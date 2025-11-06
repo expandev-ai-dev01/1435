@@ -5,7 +5,12 @@
  * @type landing-page
  * @category public
  */
+
+import { useNavigate } from 'react-router-dom';
+
 export const HomePage = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-sm p-6">
@@ -14,6 +19,12 @@ export const HomePage = () => {
           Sistema completo de gerenciamento de tarefas com recursos avançados para organização e
           produtividade.
         </p>
+        <button
+          onClick={() => navigate('/tasks/new')}
+          className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          Criar Nova Tarefa
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
