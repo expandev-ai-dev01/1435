@@ -1,2 +1,2 @@
 export { TaskForm } from './main';
-export type { TaskFormProps } from './types';
+export type { TaskFormProps, TaskFormData } from './types';

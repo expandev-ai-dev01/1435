@@ -11,7 +11,7 @@ export interface UseTaskCreateOptions {
 }
 
 export interface UseTaskCreateReturn {
-  createTask: (data: CreateTaskDto) => Promise<Task>;
+  create: (data: CreateTaskDto) => Promise<Task>;
   isCreating: boolean;
   error: Error | null;
 }

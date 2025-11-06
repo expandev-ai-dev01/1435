@@ -9,16 +9,17 @@ export interface TaskFormProps {
   onSubmit: (data: CreateTaskDto) => void;
   onCancel?: () => void;
   isSubmitting?: boolean;
-  initialData?: Partial<CreateTaskDto>;
+  defaultValues?: Partial<CreateTaskDto>;
 }
 
 export interface TaskFormData {
   title: string;
   description: string;
   dueDate: string;
-  priority: string;
-  recurrenceType: string;
-  recurrenceInterval: string;
-  recurrenceEndDate: string;
+  priority: '0' | '1' | '2';
   isDraft: boolean;
+  hasRecurrence: boolean;
+  recurrenceType?: 'diária' | 'semanal' | 'mensal' | 'anual';
+  recurrenceInterval?: number;
+  recurrenceEndDate?: string;
 }

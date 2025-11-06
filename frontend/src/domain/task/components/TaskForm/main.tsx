@@ -23,7 +23,7 @@ const taskFormSchema = z.object({
   isDraft: z.boolean().optional(),
   hasRecurrence: z.boolean().optional(),
   recurrenceType: z.enum(['diária', 'semanal', 'mensal', 'anual']).optional(),
-  recurrenceInterval: z.string().optional(),
+  recurrenceInterval: z.number().int().min(1).max(365).optional(),
   recurrenceEndDate: z.string().optional(),
 });
 
@@ -41,23 +41,18 @@ export const TaskForm = ({
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
-      title: defaultValues?.title || '',
-      description: defaultValues?.description || '',
-      dueDate: defaultValues?.dueDate || '',
-      priority: defaultValues?.priority?.toString() || '1',
-      isDraft: defaultValues?.isDraft || false,
+      priority: '1',
+      isDraft: false,
       hasRecurrence: false,
-      recurrenceType: 'diária',
-      recurrenceInterval: '1',
-      recurrenceEndDate: '',
+      ...defaultValues,
     },
   });
 
   const hasRecurrence = watch('hasRecurrence');
   const isDraft = watch('isDraft');
 
-  const handleFormSubmit = (data: TaskFormData) => {
-    const submitData: CreateTaskDto = {
+  const onFormSubmit = (data: TaskFormData) => {
+    const payload: CreateTaskDto = {
       idAccount: 1,
       idUser: 1,
       title: data.title.trim(),
@@ -68,18 +63,18 @@ export const TaskForm = ({
       recurrenceConfig:
         data.hasRecurrence && data.recurrenceType
           ? {
-              type: data.recurrenceType as 'diária' | 'semanal' | 'mensal' | 'anual',
-              interval: parseInt(data.recurrenceInterval || '1'),
+              type: data.recurrenceType,
+              interval: data.recurrenceInterval || 1,
               endDate: data.recurrenceEndDate || null,
             }
           : null,
     };
 
-    onSubmit(submitData);
+    onSubmit(payload);
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
           Título *
@@ -119,6 +114,7 @@ export const TaskForm = ({
             {...register('dueDate')}
             type="date"
             id="dueDate"
+            min={new Date().toISOString().split('T')[0]}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.dueDate && <p className="mt-1 text-sm text-red-600">{errors.dueDate.message}</p>}
@@ -140,8 +136,8 @@ export const TaskForm = ({
         </div>
       </div>
 
-      <div className="border-t border-gray-200 pt-4">
-        <div className="flex items-center mb-4">
+      <div className="space-y-4">
+        <div className="flex items-center">
           <input
             {...register('hasRecurrence')}
             type="checkbox"
@@ -149,12 +145,12 @@ export const TaskForm = ({
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
           />
           <label htmlFor="hasRecurrence" className="ml-2 block text-sm text-gray-700">
-            Configurar recorrência
+            Tarefa recorrente
           </label>
         </div>
 
         {hasRecurrence && (
-          <div className="space-y-4 pl-6 border-l-2 border-gray-200">
+          <div className="ml-6 space-y-4 p-4 bg-gray-50 rounded-md">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label
@@ -183,11 +179,12 @@ export const TaskForm = ({
                   Intervalo
                 </label>
                 <input
-                  {...register('recurrenceInterval')}
+                  {...register('recurrenceInterval', { valueAsNumber: true })}
                   type="number"
                   id="recurrenceInterval"
                   min="1"
                   max="365"
+                  defaultValue="1"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -204,6 +201,7 @@ export const TaskForm = ({
                 {...register('recurrenceEndDate')}
                 type="date"
                 id="recurrenceEndDate"
+                min={new Date().toISOString().split('T')[0]}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -223,24 +221,24 @@ export const TaskForm = ({
         </label>
       </div>
 
-      <div className="flex gap-3 pt-4 border-t border-gray-200">
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {isSubmitting ? 'Salvando...' : isDraft ? 'Salvar Rascunho' : 'Criar Tarefa'}
-        </button>
+      <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
         {onCancel && (
           <button
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="px-4 py-2 bg-gray-200 text-gray-900 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
           >
             Cancelar
           </button>
         )}
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+        >
+          {isSubmitting ? 'Salvando...' : isDraft ? 'Salvar Rascunho' : 'Criar Tarefa'}
+        </button>
       </div>
     </form>
   );

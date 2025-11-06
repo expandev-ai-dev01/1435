@@ -26,7 +26,7 @@ export const useTaskCreate = (options: UseTaskCreateOptions = {}): UseTaskCreate
   });
 
   return {
-    createTask: mutation.mutateAsync,
+    create: mutation.mutateAsync,
     isCreating: mutation.isPending,
     error: mutation.error,
   };
